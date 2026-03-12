@@ -1,0 +1,111 @@
+@extends('layouts.app')
+@section('title', 'Kelola OPD')
+
+@section('content')
+<div class="container" style="max-width:1100px;margin:0 auto;padding:18px 18px 30px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div>
+      <h2 style="margin:0;font-weight:800;color:var(--gray-800)">🏛️ Kelola OPD</h2>
+      <div style="color:var(--gray-500);margin-top:4px;">Tambah / ubah OPD yang bisa melakukan peminjaman ruangan.</div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="{{ route('admin.dashboard') }}" class="filter-btn">← Kembali</a>
+      <a href="{{ route('admin.opd.create') }}" class="filter-btn" style="background:var(--blue-600);color:#fff;border-color:transparent;">+ Tambah OPD</a>
+    </div>
+  </div>
+
+  @if(session('success'))
+    <div style="margin-top:14px;padding:12px 14px;border:1px solid rgba(34,197,94,.35);background:rgba(34,197,94,.08);border-radius:12px;color:rgb(22,101,52);">
+      {{ session('success') }}
+    </div>
+  @endif
+
+  @if(session('error'))
+    <div style="margin-top:14px;padding:12px 14px;border:1px solid rgba(239,68,68,.25);background:rgba(239,68,68,.08);border-radius:12px;color:rgb(185,28,28);">
+      {{ session('error') }}
+    </div>
+  @endif
+
+  <div class="table-container" style="margin-top:16px;">
+    <div class="table-header" style="gap:10px;flex-wrap:wrap;align-items:center;">
+      <span class="table-title">Daftar OPD</span>
+
+      <form method="GET" action="{{ route('admin.opd.index') }}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Cari OPD..."
+               style="padding:10px 12px;border:1px solid var(--gray-200);border-radius:12px;min-width:240px;">
+
+        <select name="status" style="padding:10px 12px;border:1px solid var(--gray-200);border-radius:12px;">
+          <option value="aktif" {{ ($status ?? 'aktif') === 'aktif' ? 'selected' : '' }}>Aktif</option>
+          <option value="nonaktif" {{ ($status ?? '') === 'nonaktif' ? 'selected' : '' }}>Nonaktif</option>
+          <option value="semua" {{ ($status ?? '') === 'semua' ? 'selected' : '' }}>Semua</option>
+        </select>
+
+        <button class="filter-btn" type="submit">Cari</button>
+
+        @if(($search ?? '') !== '' || ($status ?? 'aktif') !== 'aktif')
+          <a class="filter-btn" href="{{ route('admin.opd.index') }}" style="border-color:var(--gray-200);color:var(--gray-700);">
+            Reset
+          </a>
+        @endif
+      </form>
+    </div>
+
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:70px;">#</th>
+            <th>Nama</th>
+            <th style="width:120px;">Lantai</th>
+            <th>Gedung</th>
+            <th style="width:140px;">Status</th>
+            <th style="width:220px;">Aksi</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          @forelse($opds as $i => $o)
+            <tr>
+              <td>{{ $i + 1 }}</td>
+              <td style="font-weight:700">{{ $o->nama }}</td>
+              <td>{{ $o->lantai ?? '-' }}</td>
+              <td>{{ $o->gedung ?? '-' }}</td>
+              <td>
+                @if(($o->is_active ?? 1) == 1)
+                  <span class="badge badge-disetujui">AKTIF</span>
+                @else
+                  <span class="badge badge-ditolak">NONAKTIF</span>
+                @endif
+              </td>
+              <td>
+                <div class="td-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <a href="{{ route('admin.opd.edit', $o->id) }}" class="btn-action btn-view">Edit</a>
+
+                  <form method="POST" action="{{ route('admin.opd.toggle', $o->id) }}"
+                        onsubmit="return confirm('Ubah status OPD ini?');">
+                    @csrf
+                    @method('PATCH')
+                    <button type="submit"
+                            class="btn-action"
+                            style="background:rgba(59,130,246,.12);color:rgb(29,78,216);border:1px solid rgba(59,130,246,.22);">
+                      {{ ($o->is_active ?? 1) ? 'Nonaktifkan' : 'Aktifkan' }}
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          @empty
+            <tr>
+              <td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">
+                Belum ada data OPD.
+              </td>
+            </tr>
+          @endforelse
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+</div>
+@endsection

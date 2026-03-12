@@ -1,0 +1,115 @@
+
+<?php $__env->startSection('title', 'Kelola OPD'); ?>
+
+<?php $__env->startSection('content'); ?>
+<div class="container" style="max-width:1100px;margin:0 auto;padding:18px 18px 30px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+    <div>
+      <h2 style="margin:0;font-weight:800;color:var(--gray-800)">🏛️ Kelola OPD</h2>
+      <div style="color:var(--gray-500);margin-top:4px;">Tambah / ubah OPD yang bisa melakukan peminjaman ruangan.</div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="<?php echo e(route('admin.dashboard')); ?>" class="filter-btn">← Kembali</a>
+      <a href="<?php echo e(route('admin.opd.create')); ?>" class="filter-btn" style="background:var(--blue-600);color:#fff;border-color:transparent;">+ Tambah OPD</a>
+    </div>
+  </div>
+
+  <?php if(session('success')): ?>
+    <div style="margin-top:14px;padding:12px 14px;border:1px solid rgba(34,197,94,.35);background:rgba(34,197,94,.08);border-radius:12px;color:rgb(22,101,52);">
+      <?php echo e(session('success')); ?>
+
+    </div>
+  <?php endif; ?>
+
+  <?php if(session('error')): ?>
+    <div style="margin-top:14px;padding:12px 14px;border:1px solid rgba(239,68,68,.25);background:rgba(239,68,68,.08);border-radius:12px;color:rgb(185,28,28);">
+      <?php echo e(session('error')); ?>
+
+    </div>
+  <?php endif; ?>
+
+  <div class="table-container" style="margin-top:16px;">
+    <div class="table-header" style="gap:10px;flex-wrap:wrap;align-items:center;">
+      <span class="table-title">Daftar OPD</span>
+
+      <form method="GET" action="<?php echo e(route('admin.opd.index')); ?>" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+        <input type="text" name="search" value="<?php echo e($search ?? ''); ?>" placeholder="Cari OPD..."
+               style="padding:10px 12px;border:1px solid var(--gray-200);border-radius:12px;min-width:240px;">
+
+        <select name="status" style="padding:10px 12px;border:1px solid var(--gray-200);border-radius:12px;">
+          <option value="aktif" <?php echo e(($status ?? 'aktif') === 'aktif' ? 'selected' : ''); ?>>Aktif</option>
+          <option value="nonaktif" <?php echo e(($status ?? '') === 'nonaktif' ? 'selected' : ''); ?>>Nonaktif</option>
+          <option value="semua" <?php echo e(($status ?? '') === 'semua' ? 'selected' : ''); ?>>Semua</option>
+        </select>
+
+        <button class="filter-btn" type="submit">Cari</button>
+
+        <?php if(($search ?? '') !== '' || ($status ?? 'aktif') !== 'aktif'): ?>
+          <a class="filter-btn" href="<?php echo e(route('admin.opd.index')); ?>" style="border-color:var(--gray-200);color:var(--gray-700);">
+            Reset
+          </a>
+        <?php endif; ?>
+      </form>
+    </div>
+
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:70px;">#</th>
+            <th>Nama</th>
+            <th style="width:120px;">Lantai</th>
+            <th>Gedung</th>
+            <th style="width:140px;">Status</th>
+            <th style="width:220px;">Aksi</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <?php $__empty_1 = true; $__currentLoopData = $opds; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $i => $o): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+            <tr>
+              <td><?php echo e($i + 1); ?></td>
+              <td style="font-weight:700"><?php echo e($o->nama); ?></td>
+              <td><?php echo e($o->lantai ?? '-'); ?></td>
+              <td><?php echo e($o->gedung ?? '-'); ?></td>
+              <td>
+                <?php if(($o->is_active ?? 1) == 1): ?>
+                  <span class="badge badge-disetujui">AKTIF</span>
+                <?php else: ?>
+                  <span class="badge badge-ditolak">NONAKTIF</span>
+                <?php endif; ?>
+              </td>
+              <td>
+                <div class="td-actions" style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <a href="<?php echo e(route('admin.opd.edit', $o->id)); ?>" class="btn-action btn-view">Edit</a>
+
+                  <form method="POST" action="<?php echo e(route('admin.opd.toggle', $o->id)); ?>"
+                        onsubmit="return confirm('Ubah status OPD ini?');">
+                    <?php echo csrf_field(); ?>
+                    <?php echo method_field('PATCH'); ?>
+                    <button type="submit"
+                            class="btn-action"
+                            style="background:rgba(59,130,246,.12);color:rgb(29,78,216);border:1px solid rgba(59,130,246,.22);">
+                      <?php echo e(($o->is_active ?? 1) ? 'Nonaktifkan' : 'Aktifkan'); ?>
+
+                    </button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+            <tr>
+              <td colspan="6" style="text-align:center;padding:36px;color:var(--gray-400);">
+                Belum ada data OPD.
+              </td>
+            </tr>
+          <?php endif; ?>
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+</div>
+<?php $__env->stopSection(); ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Project\Ruangan_Menara_Wijaya\resources\views/admin/opd/index.blade.php ENDPATH**/ ?>
